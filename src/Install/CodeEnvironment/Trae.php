@@ -59,11 +59,25 @@ class Trae extends CodeEnvironment implements Agent, McpClient
 
     public function mcpConfigPath(): string
     {
+        $home = $this->getHomePath();
+        
         return match (Platform::current()) {
-            Platform::Darwin => '~/Library/Application Support/Trae/User/mcp.json',
+            Platform::Darwin => $home . '/Library/Application Support/Trae/User/mcp.json',
             Platform::Windows => '%APPDATA%\\Trae\\User\\mcp.json',
             Platform::Linux => '', // Not supported
         };
+    }
+
+    private function getHomePath(): string
+    {
+        if (Platform::current() === Platform::Windows) {
+            if (! isset($_SERVER['HOME'])) {
+                $_SERVER['HOME'] = $_SERVER['USERPROFILE'];
+            }
+            $_SERVER['HOME'] = str_replace('\\', '/', $_SERVER['HOME']);
+        }
+        
+        return $_SERVER['HOME'];
     }
 
     public function mcpConfigKey(): string
